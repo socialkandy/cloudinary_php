@@ -543,11 +543,11 @@ class Cloudinary
 
         $no_html_sizes = $has_layer || !empty($angle) || $crop == "fit" || $crop == "limit" || $responsive_width;
 
-        if (strlen($width) == 0 || $width &&
+        if (is_string($width) && strlen($width) == 0 || $width &&
             (substr($width, 0, 4) == "auto" || floatval($width) < 1 || $no_html_sizes)) {
             unset($options["width"]);
         }
-        if (strlen($height) == 0 || $height && (floatval($height) < 1 || $no_html_sizes)) {
+        if (is_string($height) && strlen($height) == 0 || $height && (floatval($height) < 1 || $no_html_sizes)) {
             unset($options["height"]);
         }
 
@@ -676,7 +676,7 @@ class Cloudinary
 
 
         $param_filter = function ($value) {
-            return $value === 0 || $value === '0' || trim($value) == true;
+            return $value === 0 || $value === '0' || $value && trim($value) == true;
         };
         $params = array_filter($params, $param_filter);
         ksort($params);
@@ -700,10 +700,10 @@ class Cloudinary
                 Cloudinary::generate_transformation_string($responsive_width_transformation)
             );
         }
-        if (substr($width, 0, 4) == "auto" || $responsive_width) {
+        if (is_string($width) && substr($width, 0, 4) == "auto" || $responsive_width) {
             $options["responsive"] = true;
         }
-        if (substr($dpr, 0, 4) == "auto") {
+        if (is_string($dpr) && substr($dpr, 0, 4) == "auto") {
             $options["hidpi"] = true;
         }
 
@@ -867,7 +867,7 @@ class Cloudinary
             // Build a valid overlay string.
             $layer = implode(":", array_filter($components, 'Cloudinary::is_not_null'));
         } // Handle fetch overlay from string definition.
-        elseif (substr($layer, 0, strlen('fetch:')) === 'fetch:') {
+        elseif (is_string($layer) && substr($layer, 0, strlen('fetch:')) === 'fetch:') {
             $url = substr($layer, strlen('fetch:'));
             $b64 = self::base64url_encode($url);
             $layer = 'fetch:' . $b64;
@@ -945,7 +945,7 @@ class Cloudinary
         if (is_float($exp)) {
             return self::float_to_string($exp);
         }
-        if (preg_match('/^!.+!$/', $exp)) {
+        if ($exp && preg_match('/^!.+!$/', $exp)) {
             return $exp;
         } else {
             if (empty(self::$IF_REPLACE_RE)) {
